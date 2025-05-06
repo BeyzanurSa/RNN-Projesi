@@ -1,29 +1,35 @@
 import numpy as np
 
 class SimpleRNN:
-    def __init__(self, vocab_size, embedding_dim, hidden_dim, init_method="xavier"):
+    def __init__(self, vocab_size, embedding_dim, hidden_dim, init_method="xavier", scale=0.1):
         self.vocab_size = vocab_size
         self.embedding_dim = embedding_dim
         self.hidden_dim = hidden_dim
-        self.init_method = init_method
 
-        self.init_weights()
+        if init_method == "xavier":
+            self.embedding = np.random.randn(vocab_size, embedding_dim) / np.sqrt(vocab_size)
+            self.Wxh = np.random.randn(embedding_dim, hidden_dim) / np.sqrt(embedding_dim)
+            self.Whh = np.random.randn(hidden_dim, hidden_dim) / np.sqrt(hidden_dim)
+            self.Why = np.random.randn(hidden_dim, 1) / np.sqrt(hidden_dim)
 
-    def init_weights(self):
-        if self.init_method == "classic":
-            # Klasik: Küçük normal dağılım değerleri
-            self.embedding = np.random.randn(self.vocab_size, self.embedding_dim) / 1000
-            self.Wxh = np.random.randn(self.embedding_dim, self.hidden_dim) / 1000
-            self.Whh = np.random.randn(self.hidden_dim, self.hidden_dim) / 1000
-            self.Why = np.random.randn(self.hidden_dim, 1) / 1000
-        else:  # Xavier
-            self.embedding = np.random.randn(self.vocab_size, self.embedding_dim) / np.sqrt(self.vocab_size)
-            self.Wxh = np.random.randn(self.embedding_dim, self.hidden_dim) / np.sqrt(self.embedding_dim)
-            self.Whh = np.random.randn(self.hidden_dim, self.hidden_dim) / np.sqrt(self.hidden_dim)
-            self.Why = np.random.randn(self.hidden_dim, 1) / np.sqrt(self.hidden_dim)
+        elif init_method == "classic":
+            self.embedding = np.random.randn(vocab_size, embedding_dim) / 1000
+            self.Wxh = np.random.randn(embedding_dim, hidden_dim) / 1000
+            self.Whh = np.random.randn(hidden_dim, hidden_dim) / 1000
+            self.Why = np.random.randn(hidden_dim, 1) / 1000
 
-        self.bh = np.zeros((1, self.hidden_dim))
+        elif init_method == "scaled":
+            self.embedding = np.random.randn(vocab_size, embedding_dim) * scale
+            self.Wxh = np.random.randn(embedding_dim, hidden_dim) * scale
+            self.Whh = np.random.randn(hidden_dim, hidden_dim) * scale
+            self.Why = np.random.randn(hidden_dim, 1) * scale
+
+        else:
+            raise ValueError(f"Unknown init_method: {init_method}")
+
+        self.bh = np.zeros((1, hidden_dim))
         self.by = np.zeros((1, 1))
+
 
     def sigmoid(self, x):
         return 1 / (1 + np.exp(-np.clip(x, -15, 15)))
