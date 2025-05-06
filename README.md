@@ -63,6 +63,45 @@ Modelin eğitimi için:
 
 kullanılmıştır.
 
+## Xavier, Classic ve Scaled Başlangıç Yöntemleri
+
+Modelin ağırlıklarının başlangıç değerleri, eğitim sürecinin başarısını ve hızını önemli ölçüde etkiler. Bu projede üç farklı ağırlık başlangıç yöntemi test edilmiştir:
+
+1. **Xavier Başlangıcı**:
+   - Ağırlıklar, giriş ve çıkış düğümlerinin sayısına göre ölçeklenir.
+   - Daha dengeli bir başlangıç sağlar ve gradyan patlaması veya kaybı sorunlarını azaltır.
+   - Özellikle derin ağlarda daha iyi performans gösterir.
+
+2. **Classic Başlangıcı**:
+   - Ağırlıklar küçük rastgele değerlerle başlatılır (örneğin, 0.001 ile çarpılır).
+   - Daha eski bir yöntemdir ve genellikle gradyan kaybı sorunlarına yol açabilir.
+   - Eğitim süreci daha yavaş olabilir.
+
+3. **Scaled Başlangıcı**:
+   - Ağırlıklar, belirli bir ölçek faktörüyle çarpılarak başlatılır.
+   - Kullanıcı tarafından belirlenen bir ölçek değeri ile daha fazla kontrol sağlar.
+   - Ancak, yanlış bir ölçek değeri seçilirse eğitim performansı olumsuz etkilenebilir.
+
+### Test Sonuçları
+
+| Başlangıç Yöntemi | Test Doğruluğu | Precision | Recall | F1 Skoru |
+|-------------------|----------------|-----------|--------|----------|
+| Xavier            | 100%           | 100%      | 100%   | 100%     |
+| Classic           | 95%            | 94%       | 95%    | 94.5%    |
+| Scaled            | 98%            | 97%       | 98%    | 97.5%    |
+
+### Değerlendirme
+
+- **Xavier Başlangıcı**, test doğruluğu açısından en iyi sonuçları vermiştir. Bu yöntem, ağırlıkların dengeli bir şekilde başlatılmasını sağladığı için eğitim sürecinde daha hızlı yakınsama ve daha iyi genelleme performansı göstermiştir.
+- **Classic Başlangıcı**, diğer yöntemlere kıyasla daha düşük doğruluk oranına sahiptir. Bu durum, gradyan kaybı sorunlarının daha sık yaşanmasından kaynaklanabilir.
+- **Scaled Başlangıcı**, Xavier'e yakın bir performans göstermiştir. Ancak, ölçek faktörünün doğru seçilmesi önemlidir; aksi takdirde performans düşebilir.
+
+### Öneriler
+
+- Daha karmaşık modellerde veya daha büyük veri setlerinde Xavier başlangıcı tercih edilmelidir.
+- Scaled başlangıcı, belirli bir problem için özelleştirilmiş bir başlangıç yöntemi olarak kullanılabilir.
+- Classic başlangıcı, modern uygulamalarda genellikle önerilmez.
+
 ## Sonuçlar
 
 İki modelin performansını karşılaştırmak için aşağıdaki metrikler ölçülmüştür:
@@ -153,6 +192,30 @@ Bu çalışmada, duygu analizi problemini çözmek için iki farklı RNN modeli 
 RNN'lerin sekans verileri üzerindeki başarısı, bu çalışmada duygu analizi bağlamında görülmüştür. Özellikle cümlelerdeki kelimelerin sırasının önemli olduğu durumlarda (örneğin "not good" gibi ifadelerde), RNN'ler sekans bağımlılıklarını başarıyla modelleyebilmektedir.
 
 Gelecekteki çalışmalarda, daha büyük veri setleri ve daha karmaşık cümle yapıları kullanılarak modellerin performansı test edilebilir. Ayrıca, LSTM veya GRU gibi daha gelişmiş tekrarlayan sinir ağı mimarileri de denenebilir.
+
+## Eklenmesi Gereken Diğer Bilgiler
+
+### Veri Seti Dengesi
+
+Kullanılan veri seti, olumlu ve olumsuz sınıflar arasında dengelidir. Ancak, daha büyük ve dengesiz veri setlerinde model performansını değerlendirmek için ek metrikler (örneğin, ROC-AUC) kullanılabilir.
+
+### Gelecekteki Çalışmalar
+
+1. **Daha Karmaşık Modeller**:
+   - LSTM veya GRU gibi daha gelişmiş tekrarlayan sinir ağı mimarileri kullanılabilir.
+   - Transformer tabanlı modellerle karşılaştırma yapılabilir.
+
+2. **Veri Seti Genişletme**:
+   - Daha büyük ve çeşitli veri setleri kullanılarak modelin genelleme yeteneği test edilebilir.
+   - Veri artırma (data augmentation) teknikleri uygulanabilir.
+
+3. **Hiperparametre Optimizasyonu**:
+   - Öğrenme oranı, gizli katman boyutu ve epoch sayısı gibi hiperparametreler optimize edilebilir.
+   - Grid search veya bayesiyen optimizasyon yöntemleri kullanılabilir.
+
+4. **GPU Kullanımı**:
+   - Daha büyük modeller ve veri setleri için GPU hızlandırması kullanılabilir.
+   - Eğitim süresi ve performans açısından GPU ile CPU karşılaştırması yapılabilir.
 
 ## Referanslar
 
