@@ -68,6 +68,7 @@ plt.ylabel("Loss")
 plt.title("Eğitim Kaybı (Loss)")
 plt.grid(True)
 plt.tight_layout()
+plt.savefig('images/loss_rnn.png')
 plt.show()
 
 # Accuracy grafiği
@@ -78,6 +79,7 @@ plt.ylabel("Accuracy")
 plt.title("Eğitim Doğruluğu (Accuracy)")
 plt.grid(True)
 plt.tight_layout()
+plt.savefig('images/accuracy_rnn.png')
 plt.show()
 
 # Test
@@ -115,4 +117,5 @@ disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Negatif", "P
 disp.plot(cmap='Blues')
 plt.title("Confusion Matrix")
 plt.grid(False)
+plt.savefig('images/confusion_matrix_rnn.png')
 plt.show()
