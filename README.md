@@ -21,7 +21,7 @@ Projede kullanılan veri seti, metin cümlelerini içeren ve bu cümlelerin duyg
 - "i am not happy" → olumsuz (False)
 - "this is not bad" → olumlu (True)
 
-Veri seti toplamda 58 eğitim ve 20 test örneğinden oluşmaktadır.
+Veri seti toplamda 58 eğitim ve 20 test örneğinden oluşmaktadır. Veri setinin küçük olması, sonuçların genellenebilirliğini potansiyel olarak sınırlayabilir, ancak bu çalışmanın kapsamı için yeterli sayıda örnek içermektedir. Basit kelimeler ve ifadeler içermesinin yanı sıra, "not" gibi olumsuzlaştırıcı ifadeler de kullanıldığı için, RNN'lerin sekans verilerini işlemedeki avantajını göstermek için oldukça uygundur.
 
 ### Önişleme
 
@@ -47,6 +47,15 @@ Model içinde:
 
 Manuel olarak uygulanmıştır.
 
+### Hiperparametre Seçimi
+
+Bu çalışmada kullanılan hiperparametreler şunlardır:
+- Embedding boyutu: 16
+- Gizli katman boyutu: 32
+- Maksimum dizi uzunluğu: 10
+
+Embedding ve gizli katman boyutları, veri setinin boyutu ve karmaşıklığı göz önünde bulundurularak seçilmiştir. Çok büyük boyutlar aşırı öğrenmeye yol açabilirken, çok küçük boyutlar yetersiz öğrenmeye neden olabilir. Seçilen değerler, küçük veri setiyle iyi bir performans-karmaşıklık dengesi sağlamaktadır.
+
 ### PyTorch RNN Modeli
 
 PyTorch kütüphanesini kullanarak aynı mimariye sahip bir RNN modeli oluşturulmuştur:
@@ -68,19 +77,22 @@ kullanılmıştır.
 Modelin ağırlıklarının başlangıç değerleri, eğitim sürecinin başarısını ve hızını önemli ölçüde etkiler. Bu projede üç farklı ağırlık başlangıç yöntemi test edilmiştir:
 
 1. **Xavier Başlangıcı**:
-   - Ağırlıklar, giriş ve çıkış düğümlerinin sayısına göre ölçeklenir.
+   - Ağırlıklar, giriş ve çıkış düğümlerinin sayısına göre ölçeklenir: W ~ N(0, √(2/(n_in + n_out)))
    - Daha dengeli bir başlangıç sağlar ve gradyan patlaması veya kaybı sorunlarını azaltır.
-   - Özellikle derin ağlarda daha iyi performans gösterir.
+   - Özellikle derin ağlarda daha iyi performans gösterir çünkü gradyanların ileri ve geri yayılım sırasında istikrarlı kalmasını sağlar.
+   - Tanh veya sigmoid gibi aktivasyon fonksiyonları kullanıldığında özellikle etkilidir.
 
 2. **Classic Başlangıcı**:
    - Ağırlıklar küçük rastgele değerlerle başlatılır (örneğin, 0.001 ile çarpılır).
    - Daha eski bir yöntemdir ve genellikle gradyan kaybı sorunlarına yol açabilir.
-   - Eğitim süreci daha yavaş olabilir.
+   - Eğitim süreci daha yavaş olabilir çünkü çok küçük başlangıç değerleri, eğitimin başında çok yavaş bir öğrenmeye neden olur.
+   - Derin ağlarda bu yöntem, genellikle ilk katmanlarda gradyanların sıfıra yaklaşmasına neden olabilir.
 
 3. **Scaled Başlangıcı**:
-   - Ağırlıklar, belirli bir ölçek faktörüyle çarpılarak başlatılır.
+   - Ağırlıklar, belirli bir ölçek faktörüyle çarpılarak başlatılır (bu projede 0.1).
    - Kullanıcı tarafından belirlenen bir ölçek değeri ile daha fazla kontrol sağlar.
    - Ancak, yanlış bir ölçek değeri seçilirse eğitim performansı olumsuz etkilenebilir.
+   - Belirli problem türleri için özelleştirilebilir, ancak en uygun ölçek değerini bulmak için genellikle deneysel yaklaşım gerektirir.
 
 ### Test Sonuçları
 
@@ -88,13 +100,13 @@ Modelin ağırlıklarının başlangıç değerleri, eğitim sürecinin başarı
 |-------------------|----------------|-----------|--------|----------|
 | Xavier            | 100%           | 100%      | 100%   | 100%     |
 | Classic           | 50%            | 50%       | 50%    | 50%      |
-| Scaled            | 98%            | 97%       | 98%    | 97.5%    |
+| Scaled            | 100%           | 100%      | 100%   | 100%     |
 
 ### Değerlendirme
 
 - **Xavier Başlangıcı**, test doğruluğu açısından en iyi sonuçları vermiştir. Bu yöntem, ağırlıkların dengeli bir şekilde başlatılmasını sağladığı için eğitim sürecinde daha hızlı yakınsama ve daha iyi genelleme performansı göstermiştir.
 - **Classic Başlangıcı**, diğer yöntemlere kıyasla daha düşük doğruluk oranına sahiptir. Bu durum, gradyan kaybı sorunlarının daha sık yaşanmasından kaynaklanabilir.
-- **Scaled Başlangıcı**, Xavier'e yakın bir performans göstermiştir. Ancak, ölçek faktörünün doğru seçilmesi önemlidir; aksi takdirde performans düşebilir.
+- **Scaled Başlangıcı**, Xavier'e benzer bir performans göstermiştir. Bu çalışmada kullanılan 0.1 ölçek değerinin bu problem için uygun olduğu görülmektedir. Ancak, farklı problemlerde optimal ölçek değeri değişebilir.
 
 ### Öneriler
 
@@ -191,8 +203,14 @@ Bu çalışmada, duygu analizi problemini çözmek için iki farklı RNN modeli 
 
 RNN'lerin sekans verileri üzerindeki başarısı, bu çalışmada duygu analizi bağlamında görülmüştür. Özellikle cümlelerdeki kelimelerin sırasının önemli olduğu durumlarda (örneğin "not good" gibi ifadelerde), RNN'ler sekans bağımlılıklarını başarıyla modelleyebilmektedir.
 
-Gelecekteki çalışmalarda, daha büyük veri setleri ve daha karmaşık cümle yapıları kullanılarak modellerin performansı test edilebilir. Ayrıca, LSTM veya GRU gibi daha gelişmiş tekrarlayan sinir ağı mimarileri de denenebilir.
+### Gelecek Çalışmalar için Öneriler
 
+- Daha büyük ve çeşitli duygu analizi veri setleri ile modellerin genelleme yeteneği test edilebilir.
+- LSTM (Long Short-Term Memory) veya GRU (Gated Recurrent Unit) gibi daha gelişmiş tekrarlayan sinir ağı mimarileri uygulanabilir.
+- Farklı dillerde duygu analizi performansı karşılaştırılabilir.
+- Çift yönlü RNN (BiRNN) gibi daha karmaşık yapılar denenerek performans artışı sağlanabilir.
+- Özellikle büyük veri setlerinde mini-batch eğitim yöntemleri kullanılarak eğitim süresi optimize edilebilir.
+- Transfer öğrenimi yaklaşımları ile önceden eğitilmiş modeller üzerinden ince ayar yapılabilir.
 
 ## Referanslar
 
