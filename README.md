@@ -193,29 +193,6 @@ RNN'lerin sekans verileri üzerindeki başarısı, bu çalışmada duygu analizi
 
 Gelecekteki çalışmalarda, daha büyük veri setleri ve daha karmaşık cümle yapıları kullanılarak modellerin performansı test edilebilir. Ayrıca, LSTM veya GRU gibi daha gelişmiş tekrarlayan sinir ağı mimarileri de denenebilir.
 
-## Eklenmesi Gereken Diğer Bilgiler
-
-### Veri Seti Dengesi
-
-Kullanılan veri seti, olumlu ve olumsuz sınıflar arasında dengelidir. Ancak, daha büyük ve dengesiz veri setlerinde model performansını değerlendirmek için ek metrikler (örneğin, ROC-AUC) kullanılabilir.
-
-### Gelecekteki Çalışmalar
-
-1. **Daha Karmaşık Modeller**:
-   - LSTM veya GRU gibi daha gelişmiş tekrarlayan sinir ağı mimarileri kullanılabilir.
-   - Transformer tabanlı modellerle karşılaştırma yapılabilir.
-
-2. **Veri Seti Genişletme**:
-   - Daha büyük ve çeşitli veri setleri kullanılarak modelin genelleme yeteneği test edilebilir.
-   - Veri artırma (data augmentation) teknikleri uygulanabilir.
-
-3. **Hiperparametre Optimizasyonu**:
-   - Öğrenme oranı, gizli katman boyutu ve epoch sayısı gibi hiperparametreler optimize edilebilir.
-   - Grid search veya bayesiyen optimizasyon yöntemleri kullanılabilir.
-
-4. **GPU Kullanımı**:
-   - Daha büyük modeller ve veri setleri için GPU hızlandırması kullanılabilir.
-   - Eğitim süresi ve performans açısından GPU ile CPU karşılaştırması yapılabilir.
 
 ## Referanslar
 
