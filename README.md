@@ -87,7 +87,7 @@ Modelin ağırlıklarının başlangıç değerleri, eğitim sürecinin başarı
 | Başlangıç Yöntemi | Test Doğruluğu | Precision | Recall | F1 Skoru |
 |-------------------|----------------|-----------|--------|----------|
 | Xavier            | 100%           | 100%      | 100%   | 100%     |
-| Classic           | 95%            | 94%       | 95%    | 94.5%    |
+| Classic           | 50%            | 50%       | 50%    | 50%      |
 | Scaled            | 98%            | 97%       | 98%    | 97.5%    |
 
 ### Değerlendirme
