@@ -1,21 +1,31 @@
 import numpy as np
 
 class SimpleRNN:
-    def __init__(self, vocab_size, embedding_dim, hidden_dim):
+    def __init__(self, vocab_size, embedding_dim, hidden_dim, init_method="xavier"):
         self.vocab_size = vocab_size
         self.embedding_dim = embedding_dim
         self.hidden_dim = hidden_dim
+        self.init_method = init_method
 
-        # Daha iyi başlangıç ağırlıkları (Xavier/Glorot initialization)
-        self.embedding = np.random.randn(vocab_size, embedding_dim) / np.sqrt(vocab_size)
-        self.Wxh = np.random.randn(embedding_dim, hidden_dim) / np.sqrt(embedding_dim)
-        self.Whh = np.random.randn(hidden_dim, hidden_dim) / np.sqrt(hidden_dim)
-        self.Why = np.random.randn(hidden_dim, 1) / np.sqrt(hidden_dim)
-        self.bh = np.zeros((1, hidden_dim))
+        self.init_weights()
+
+    def init_weights(self):
+        if self.init_method == "classic":
+            # Klasik: Küçük normal dağılım değerleri
+            self.embedding = np.random.randn(self.vocab_size, self.embedding_dim) / 1000
+            self.Wxh = np.random.randn(self.embedding_dim, self.hidden_dim) / 1000
+            self.Whh = np.random.randn(self.hidden_dim, self.hidden_dim) / 1000
+            self.Why = np.random.randn(self.hidden_dim, 1) / 1000
+        else:  # Xavier
+            self.embedding = np.random.randn(self.vocab_size, self.embedding_dim) / np.sqrt(self.vocab_size)
+            self.Wxh = np.random.randn(self.embedding_dim, self.hidden_dim) / np.sqrt(self.embedding_dim)
+            self.Whh = np.random.randn(self.hidden_dim, self.hidden_dim) / np.sqrt(self.hidden_dim)
+            self.Why = np.random.randn(self.hidden_dim, 1) / np.sqrt(self.hidden_dim)
+
+        self.bh = np.zeros((1, self.hidden_dim))
         self.by = np.zeros((1, 1))
 
     def sigmoid(self, x):
-        # Numerik stabilite için clipping ekledik
         return 1 / (1 + np.exp(-np.clip(x, -15, 15)))
 
     def forward(self, x):
@@ -33,12 +43,10 @@ class SimpleRNN:
         return y
 
     def binary_cross_entropy(self, prediction, label):
-        # Numerik stabilite için değerler sınırlandırıldı
         prediction = np.clip(prediction, 1e-7, 1 - 1e-7)
         return -(label * np.log(prediction) + (1 - label) * np.log(1 - prediction))
 
     def backward(self, x, label, learning_rate=0.05):
-        # Öğrenme oranını artırdık
         y_pred = self.forward(x)
         loss = self.binary_cross_entropy(y_pred, label)
 
@@ -55,25 +63,22 @@ class SimpleRNN:
             h = self.last_hs[t]
             h_prev = self.last_hs[t - 1]
 
-            # Gradyan akışı için Why'den gelen gradyan daha büyük
             if t == len(x) - 1:
                 d_h = d_y @ self.Why.T * (1 - h * h)
             else:
                 d_h = (d_h_next @ self.Whh.T) * (1 - h * h)
-                
+
             d_Whh += h_prev.T @ d_h
             d_Wxh += self.last_inputs[t].T @ d_h
 
-            if x[t] != 0:  # <PAD> token'ı güncelleme dışı bırakıldı
+            if x[t] != 0:
                 d_embedding[x[t]] += (d_h @ self.Wxh.T).flatten()
 
             d_h_next = d_h
 
-        # Gradyan patlama sorununu önlemek için clipping
         for grad in [d_Why, d_Whh, d_Wxh, d_embedding]:
             np.clip(grad, -5, 5, out=grad)
 
-        # Güncelleme
         self.Why -= learning_rate * d_Why
         self.by -= learning_rate * d_by
         self.Whh -= learning_rate * d_Whh
